@@ -1,12 +1,14 @@
 package hardware
 
 import (
-	"github.com/shirou/gopsutil/cpu"
-	"github.com/shirou/gopsutil/disk"
-	"github.com/shirou/gopsutil/host"
-	"github.com/shirou/gopsutil/mem"
+	"fmt"
 	"runtime"
 	"strconv"
+
+	"github.com/shirou/gopsutil/v4/cpu"
+	"github.com/shirou/gopsutil/v4/disk"
+	"github.com/shirou/gopsutil/v4/host"
+	"github.com/shirou/gopsutil/v4/mem"
 )
 
 const megabyteDiv uint64 = 1024 * 1024
@@ -55,6 +57,10 @@ func GetDiskSection() (string, error) {
 
 func GetCpuSection() (string, error) {
 	cpuStat, err := cpu.Info()
+	if err != nil {
+		fmt.Println("Error getting CPU info", err)
+
+	}
 	percentage, err := cpu.Percent(0, true)
 	if err != nil {
 		return "", err
@@ -62,9 +68,11 @@ func GetCpuSection() (string, error) {
 
 	html := "<div class='cpu-data'><table class='table table-striped table-hover table-sm'><tbody>"
 
-	html = html + "<tr><td>Model Name:</td><td>" + cpuStat[0].ModelName + "</td></tr>"
-	html = html + "<tr><td>Family:</td><td>" + cpuStat[0].Family + "</td></tr>"
-	html = html + "<tr><td>Speed:</td><td>" + strconv.FormatFloat(cpuStat[0].Mhz, 'f', 2, 64) + " MHz</td></tr>"
+	if len(cpuStat) != 0 {
+		html = html + "<tr><td>Model Name:</td><td>" + cpuStat[0].ModelName + "</td></tr>"
+		html = html + "<tr><td>Family:</td><td>" + cpuStat[0].Family + "</td></tr>"
+		html = html + "<tr><td>Speed:</td><td>" + strconv.FormatFloat(cpuStat[0].Mhz, 'f', 2, 64) + " MHz</td></tr>"
+	}
 
 	firstCpus := percentage[:len(percentage)/2]
 	secondCpus := percentage[len(percentage)/2:]
